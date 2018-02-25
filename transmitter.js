@@ -45,9 +45,28 @@ basic.forever(() => {
         led.unplot(4, 0)
     }
     if (pressed) {
-        radio.sendString((speedA - 1) + ":" + (speedB - 1))
-        led.plotBrightness(0, 0, speedA - 1)
-        led.plotBrightness(4, 0, speedB - 1)
+        let a = speedA - 1
+        let b = speedB - 1
+        let aa = ""
+        let bb = ""
+        if (a < 10) {
+            aa = "00" + a
+        } else if (a < 100) {
+            aa = "0" + a
+        } else {
+            aa = "" + a
+        }
+        if (b < 10) {
+            bb = "00" + b
+        } else if (b < 100) {
+            bb = "0" + b
+        } else {
+            bb = "" + b
+        }
+        console.log(aa + ":" + bb)
+        radio.sendString(aa + ":" + bb)
+        led.plotBrightness(0, 0, a)
+        led.plotBrightness(4, 0, b)
     }
     basic.pause(100)
 })
