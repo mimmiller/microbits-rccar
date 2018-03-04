@@ -103,7 +103,7 @@ function remoteTypeC() {
         left()
     } else if (bb2 && !bab && !ba) {
         right()
-    } else if (ayy2 < 2) {
+    } else if (ayy2 < 1) {
         forwardFull()
     } else if (ayy2 < 2) {
         forward()
