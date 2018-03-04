@@ -36,23 +36,23 @@ function remoteTypeC() {
     ax2 = input.acceleration(Dimension.X)
     ay2 = input.acceleration(Dimension.Y)
     az2 = input.acceleration(Dimension.Z)
-    ax2 = (ax2 + 1024) / 8
-    ay2 = (ay2 + 1024) / 8
-    az2 = (az2 + 1024) / 8
-    plotBar(1, ax2, 255)
-    plotBar(2, ay2, 255)
-    plotBar(3, az2, 255)
-    let axx2 = quantize(ax2, 255)
-    let ayy2 = quantize(ay2, 255)
-    let azz2 = quantize(az2, 255)
+    let axx2 = quantize(ax2, -1024, 1024)
+    let ayy2 = quantize(ay2, -1024, 1024)
+    let azz2 = quantize(az2, -1024, 1024)
+    plotBar(1, axx2)
+    plotBar(2, ayy2)
+    plotBar(3, azz2)
     ba = input.buttonIsPressed(Button.A)
     bb2 = input.buttonIsPressed(Button.B)
     bab = input.buttonIsPressed(Button.AB)
-    if (ayy2 < 3 && !(ba) && !(bb2) && !(bab)) {
+    // console.log("ax2:" + axx2)
+    // console.log("ay2:" + ayy2)
+    // console.log("az2:" + azz2)
+    if (ayy2 < 2 && !(ba) && !(bb2) && !(bab)) {
         forward()
-    } else if (!(bb2) && !(bab) && (ayy2 < 3 || ba)) {
+    } else if (!(bb2) && !(bab) && (ayy2 < 2 || ba)) {
         left()
-    } else if (!(ba) && !(bab) && (ayy2 < 3 || bb2)) {
+    } else if (!(ba) && !(bab) && (ayy2 < 2 || bb2)) {
         right()
     } else if (pressed && (ayy2 > 3 || bab)) {
         stop()
@@ -106,23 +106,26 @@ function remoteTypeB() {
     ax = input.acceleration(Dimension.X)
     ay = input.acceleration(Dimension.Y)
     az = input.acceleration(Dimension.Z)
-    ax = (ax + 1024) / 8
-    ay = (ay + 1024) / 8
-    az = (az + 1024) / 8
-    plotBar(1, ax, 255)
-    plotBar(2, ay, 255)
-    plotBar(3, az, 255)
-    let axx = quantize(ax, 255)
-    let ayy = quantize(ay, 255)
-    let azz = quantize(az, 255)
-    if (axx > 1 && axx < 5 && ayy < 3 && azz < 3) {
-        forward()
-    } else if (axx < 1 && ayy < 1 && azz < 3 || axx == 0 && ayy > 2 && ayy < 4 && azz < 3) {
-        left()
-    } else if (axx > 4 && ayy < 1 && azz < 3 || axx == 5 && ayy > 2 && ayy < 4 && azz < 3) {
-        right()
-    } else if (pressed && ayy > 2 && axx < 3 && azz < 2) {
+
+    let axx = quantize(ax, -1024, 1024)
+    let ayy = quantize(ay, -1024, 1024)
+    let azz = quantize(az, -1024, 1024)
+    plotBar(1, axx)
+    plotBar(2, ayy)
+    plotBar(3, azz)
+    // console.log("ax:" + axx)
+    // console.log("ay:" + ayy)
+    // console.log("az:" + azz)
+    if (pressed && ayy > 3) {
         stop()
+    } else if (axx < 2) {
+        // && ayy < 40 && azz < 40 || axx == 0 && ayy > 2 && ayy < 4 && azz < 3) {
+        left()
+    } else if (axx > 3) {
+        // axx > 4 && ayy < 1 && azz < 3 || axx == 5 && ayy > 2 && ayy < 4 && azz < 3) {
+        right()
+    } else if (ayy < 2) {
+        forward()
     }
 }
 function remoteTypeA() {
@@ -152,7 +155,7 @@ speedA = 1
 speedB = 1
 speedA = 1
 speedB = 1
-function quantize(value: number, high: number) {
+function quantize00(value: number, high: number) {
     let seg = high / 6
     if (value > seg * 5) {
         return 5
@@ -162,13 +165,46 @@ function quantize(value: number, high: number) {
         return 3
     } else if (value > seg * 2) {
         return 2
-    } else if (value > seg * 2) {
+    } else if (value > seg) {
         return 1
     } else {
         return 0
     }
 }
-function plotBar(xB: number, value: number, high: number) {
+
+function quantize(value: number, low: number, high: number) {
+    let diff = high - low
+    let seg = diff / 6
+    let curr = low + seg
+    let result = 0
+    for (let i = 0; i < 5; i++) {
+        if (value > curr) {
+            result++
+            curr += seg
+        } else if (value > curr - seg) {
+            let percent = (value - curr) * 100 / seg
+            if (percent > 50) {
+                result++
+            }
+            curr += seg
+        } else {
+            return result
+        }
+    }
+    return result
+}
+
+function plotBar(xB: number, value: number) {
+    for (let i = 0; i < 5; i++) {
+        if (value > i) {
+            led.plot(xB, 4 - i)
+        } else {
+            led.unplot(xB, 4 - i)
+        }
+    }
+}
+
+function plotBar00(xB: number, value: number, high: number) {
     let seg2 = high / 6
     if (value > seg2 * 5) {
         led.plot(xB, 0)
@@ -194,7 +230,7 @@ function plotBar(xB: number, value: number, high: number) {
         led.unplot(xB, 2)
         led.plot(xB, 3)
         led.plot(xB, 4)
-    } else if (value > seg2 * 2) {
+    } else if (value > seg2) {
         led.unplot(xB, 0)
         led.unplot(xB, 1)
         led.unplot(xB, 2)
