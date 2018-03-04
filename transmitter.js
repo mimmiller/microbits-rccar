@@ -32,31 +32,11 @@ input.onButtonPressed(Button.A, () => {
         }
     }
 })
-function remoteTypeC() {
-    ax2 = input.acceleration(Dimension.X)
-    ay2 = input.acceleration(Dimension.Y)
-    az2 = input.acceleration(Dimension.Z)
-    let axx2 = quantize(ax2, -1024, 1024)
-    let ayy2 = quantize(ay2, -1024, 1024)
-    let azz2 = quantize(az2, -1024, 1024)
-    plotBar(1, axx2)
-    plotBar(2, ayy2)
-    plotBar(3, azz2)
-    ba = input.buttonIsPressed(Button.A)
-    bb2 = input.buttonIsPressed(Button.B)
-    bab = input.buttonIsPressed(Button.AB)
-    // console.log("ax2:" + axx2)
-    // console.log("ay2:" + ayy2)
-    // console.log("az2:" + azz2)
-    if (ayy2 < 2 && !(ba) && !(bb2) && !(bab)) {
-        forward()
-    } else if (!(bb2) && !(bab) && (ayy2 < 2 || ba)) {
-        left()
-    } else if (!(ba) && !(bab) && (ayy2 < 2 || bb2)) {
-        right()
-    } else if (pressed && (ayy2 > 3 || bab)) {
-        stop()
-    }
+function forwardFull() {
+    pressed = true
+    speed = 254
+    speedA = speed
+    speedB = speed
 }
 function forward() {
     pressed = true
@@ -102,30 +82,72 @@ function stop() {
     basic.pause(10)
     radio.sendString("000:000")
 }
+
+function remoteTypeC() {
+    ax2 = input.acceleration(Dimension.X)
+    ay2 = input.acceleration(Dimension.Y)
+    az2 = input.acceleration(Dimension.Z)
+    let axx2 = quantize(ax2, -1024, 1024)
+    let ayy2 = quantize(ay2, -1024, 1024)
+    let azz2 = quantize(az2, -1024, 1024)
+    plotBar(1, axx2)
+    plotBar(2, ayy2)
+    plotBar(3, azz2)
+    ba = input.buttonIsPressed(Button.A)
+    bb2 = input.buttonIsPressed(Button.B)
+    bab = input.buttonIsPressed(Button.AB)
+
+    if (pressed && ayy2 > 3) {
+        stop()
+    } else if (!bb2 && !bab && ba) {
+        left()
+    } else if (bb2 && !bab && !ba) {
+        right()
+    } else if (ayy2 < 2) {
+        forwardFull()
+    } else if (ayy2 < 2) {
+        forward()
+    } else if (pressed && ayy2 < 3) {
+        forward()
+    } else if ((axx2 == 3 || axx2 == 2) && (ayy2 == 3 || ayy2 == 2)) {
+        stop()
+    }
+
+    // if (ayy2 < 2 && !(ba) && !(bb2) && !(bab)) {
+    //     forward()
+    // } else if (!(bb2) && !(bab) && (ayy2 < 2 || ba)) {
+    //     left()
+    // } else if (!(ba) && !(bab) && (ayy2 < 2 || bb2)) {
+    //     right()
+    // } else if (pressed && (ayy2 > 3 || bab)) {
+    //     stop()
+    // }
+}
+
 function remoteTypeB() {
     ax = input.acceleration(Dimension.X)
     ay = input.acceleration(Dimension.Y)
     az = input.acceleration(Dimension.Z)
-
     let axx = quantize(ax, -1024, 1024)
     let ayy = quantize(ay, -1024, 1024)
     let azz = quantize(az, -1024, 1024)
     plotBar(1, axx)
     plotBar(2, ayy)
     plotBar(3, azz)
-    // console.log("ax:" + axx)
-    // console.log("ay:" + ayy)
-    // console.log("az:" + azz)
     if (pressed && ayy > 3) {
         stop()
     } else if (axx < 2) {
-        // && ayy < 40 && azz < 40 || axx == 0 && ayy > 2 && ayy < 4 && azz < 3) {
         left()
     } else if (axx > 3) {
-        // axx > 4 && ayy < 1 && azz < 3 || axx == 5 && ayy > 2 && ayy < 4 && azz < 3) {
         right()
+    } else if (ayy < 1) {
+        forwardFull()
     } else if (ayy < 2) {
         forward()
+    } else if (pressed && ayy < 3) {
+        forward()
+    } else if ((axx == 3 || axx == 2) && (ayy == 3 || ayy == 2)) {
+        stop()
     }
 }
 function remoteTypeA() {
